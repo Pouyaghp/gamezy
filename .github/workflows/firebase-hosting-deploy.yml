@@ -1,0 +1,19 @@
+name: Deploy to Firebase Hosting on Push
+
+on:
+  push:
+    branches:
+      - main  # Change if you use another default branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GAMEZY_ADA70 }}
+          channelId: live
+          projectId: gamezy-ada70
