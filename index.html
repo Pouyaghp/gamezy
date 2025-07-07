@@ -3,55 +3,99 @@
 <head>
   <meta charset="utf-8" />
   <link rel="icon" href="/branding/icon.ico" type="image/x-icon" />
-  <title>GameZy</title>
+  <title>GameZy - Coming Soon</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    #password-gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    #password-gate input[type="password"] {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    #password-gate button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #wrong-password {
+      color: red;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
 </head>
 <body class="is-preload">
 
-  <!-- Header -->
-  <header id="header">
-    <h1>Welcome to GameZy</h1>
-    <p>
-      GameZy is your go-to platform for discovering new and trending games.<br>
-      We showcase upcoming releases, trailers, and game insights so you never miss what’s next in the world of gaming.
-      Brought to you by <a href="#">Pouya</a>.
-    </p>
-  </header>
+  <!-- Password Page -->
+  <div id="password-gate">
+    <h1>GameZy is Coming Soon</h1>
+    <p>Enter the access password to preview the site.</p>
+    <input type="password" id="password" placeholder="Enter password" />
+    <button onclick="checkPassword()">Enter</button>
+    <p id="wrong-password">Incorrect password. Please try again.</p>
+  </div>
 
-  <!-- Signup Form -->
-  <form id="signup-form">
-    <input type="email" name="email" id="email" placeholder="Email Address" required />
-    <input type="submit" value="Sign Up" />
-  </form>
+  <!-- Hidden real site -->
+  <div id="real-site" style="display: none;">
+    <!-- Header -->
+    <header id="header">
+      <h1>Welcome to GameZy</h1>
+      <p>
+        GameZy is your go-to platform for discovering new and trending games.<br>
+        We showcase upcoming releases, trailers, and game insights so you never miss what’s next in the world of gaming.
+        Brought to you by <a href="#">Pouya</a>.
+      </p>
+    </header>
 
-  <!-- Footer -->
-  <footer id="footer">
-    <ul class="icons">
-      <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-      <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
-      <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
-      <li><a href="#" class="icon fa-envelope"><span class="label">Email</span></a></li>
-    </ul>
-    <ul class="copyright">
-      <li>&copy; 2025 GameZy. All rights reserved.</li>
-      <li><a href="about.html">About us</a></li>
-    </ul>
-  </footer>
+    <!-- Signup Form -->
+    <form id="signup-form">
+      <input type="email" name="email" id="email" placeholder="Email Address" required />
+      <input type="submit" value="Sign Up" />
+    </form>
+
+    <!-- Footer -->
+    <footer id="footer">
+      <ul class="icons">
+        <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+        <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+        <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+        <li><a href="#" class="icon fa-envelope"><span class="label">Email</span></a></li>
+      </ul>
+      <ul class="copyright">
+        <li>&copy; 2025 GameZy. All rights reserved.</li>
+        <li><a href="about.html">About us</a></li>
+      </ul>
+    </footer>
+  </div>
 
   <!-- Scripts -->
   <script src="assets/js/main.js"></script>
-
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
-
-  <!-- Firebase Config (updated path) -->
   <script src="database/firebase-config.js"></script>
-
-  <!-- Page-specific logic -->
   <script src="subscribe.js"></script>
 
+  <script>
+    const correctPassword = "gamezy123"; // change this to your desired password
+
+    function checkPassword() {
+      const entered = document.getElementById("password").value;
+      if (entered === correctPassword) {
+        document.getElementById("password-gate").style.display = "none";
+        document.getElementById("real-site").style.display = "block";
+      } else {
+        document.getElementById("wrong-password").style.display = "block";
+      }
+    }
+  </script>
 </body>
 </html>
