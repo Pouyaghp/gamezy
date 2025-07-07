@@ -1,54 +1,56 @@
 <!DOCTYPE HTML>
-<html>
-	<head>
-		<title>BAAZIROO</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-	</head>
-	<body class="is-preload">
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GameZy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+<body class="is-preload">
 
-		<!-- Header -->
-			<header id="header">
-				<h1>Welcome to Baaziroo</h1>
-				<p>Baaziroo is your go-to platform for discovering new and trending games.<br>
-				We showcase upcoming releases, trailers, and game insights so you never miss what’s next in the world of gaming. Brought to you by <a href="#">Pouya</a>.</p>
-			</header>
+  <!-- Header -->
+  <header id="header">
+    <h1>Welcome to GameZy</h1>
+    <p>
+      GameZy is your go-to platform for discovering new and trending games.<br>
+      We showcase upcoming releases, trailers, and game insights so you never miss what’s next in the world of gaming.
+      Brought to you by <a href="#">Pouya</a>.
+    </p>
+  </header>
 
-		<!-- Signup Form -->
-			<form id="signup-form">
-  				<input type="email" name="email" id="email" placeholder="Email Address" required />
-				<input type="submit" value="Sign Up" />
-			</form>
+  <!-- Signup Form -->
+  <form id="signup-form">
+    <input type="email" name="email" id="email" placeholder="Email Address" required />
+    <input type="submit" value="Sign Up" />
+  </form>
 
+  <!-- Footer -->
+  <footer id="footer">
+    <ul class="icons">
+      <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+      <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+      <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+      <li><a href="#" class="icon fa-envelope"><span class="label">Email</span></a></li>
+    </ul>
+    <ul class="copyright">
+      <li>&copy; 2025 GameZy. All rights reserved.</li>
+      <li><a href="about.html">About us</a></li>
+    </ul>
+  </footer>
 
-		<!-- Footer -->
-			<footer id="footer">
-				<ul class="icons">
-					<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-					<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
-					<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
-					<li><a href="#" class="icon fa-envelope"><span class="label">Email</span></a></li>
+  <!-- Scripts -->
+  <script src="assets/js/main.js"></script>
 
-				</ul>
-				<ul class="copyright">
-					<li>&copy; 2025 Baaziroo. All rights reserved.</li><li><a href="about.html">About us</a></li>
-				</ul>
-			</footer>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
 
-		<!-- Scripts -->
-			<script src="assets/js/main.js"></script>
-		
-		<!-- Firebase SDKs -->
-			<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-			<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <!-- Firebase Config (updated path) -->
+  <script src="database/firebase-config.js"></script>
 
-		<!-- Firebase Config (shared) -->
-			<script src="firebase-config.js"></script>
+  <!-- Page-specific logic -->
+  <script src="subscribe.js"></script>
 
-		<!-- Page-specific logic -->
-			<script src="subscribe.js"></script>
-
-					
-	</body>
+</body>
 </html>
