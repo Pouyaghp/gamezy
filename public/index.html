@@ -70,16 +70,44 @@
     </header>
 
     <!-- Dynamic Game Link -->
-  <div class="image-row">
-  <a href="grandtheftauto_VI.html">
-    <img src="images/Grand_Theft_Auto_VI.png" alt="GTA VI" class="game-image">
-  </a>
-  <a href="callofduty_bo6.html">
-    <img src="images/bo6.jpg" alt="BO6" class="game-image">
-  </a>
-</div>
-
-
+<a href="grandtheftauto_VI.html" style="
+  display: inline-block;
+  width: 300px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  transition: transform 0.3s;
+">
+  <img src="images/Grand_Theft_Auto_VI.png" alt="Grand Theft Auto VI" style="
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  "
+  onmouseover="this.style.transform='scale(1.05)'"
+  onmouseout="this.style.transform='scale(1)'">
+</a>
+<a href="callofduty_bo6.html" style="
+  display: inline-block;
+  width: 300px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  transition: transform 0.3s;
+">
+  <img src="images/bo6.jpg" alt="Call of Duty BO6" style="
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  "
+  onmouseover="this.style.transform='scale(1.05)'"
+  onmouseout="this.style.transform='scale(1)'">
+</a>
 
 
     <!-- Footer -->
