@@ -1,0 +1,4 @@
+RewriteEngine On
+
+# Redirect /home to /index.html
+RewriteRule ^home$ /index.html [L]
