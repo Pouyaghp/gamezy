@@ -885,3 +885,15 @@ button,
       left: auto;
       margin: 1em 0 0 0;
       position: relative; } }
+
+    /* Custom Featured Game Images */
+    .featured-game-img {
+      width: 250px;
+      height: 350px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;}
+
+    .featured-game-img:hover {
+      transform: scale(1.05);}
