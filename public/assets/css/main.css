@@ -887,27 +887,33 @@ button,
       position: relative; } }
 
     /* Custom Featured Game Images */
-.image-row {
+    .image-row {
   display: flex;
   justify-content: center;
   gap: 30px;
-  flex-wrap: wrap; /* Makes it responsive on smaller screens */
+  flex-wrap: wrap;
   margin: 40px 0;
 }
 
 .image-row a {
-  text-decoration: none;
-}
-
-.game-image {
-  width: 250px; /* consistent width */
-  aspect-ratio: 3 / 4; /* keeps same shape, 3:4 ratio */
-  object-fit: cover; /* crops image to fit */
+  display: block;
+  width: 250px;
+  aspect-ratio: 3 / 4; /* Always same shape */
+  overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
 }
 
-.game-image:hover {
+.image-row a:hover {
   transform: scale(1.05);
 }
+
+.game-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+}
+
