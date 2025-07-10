@@ -1,24 +1,12 @@
 {
   "hosting": {
-    "public": ".", 
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
-      {
-        "source": "/home",
-        "destination": "index.html"
-      },
-      {
-        "source": "/about",
-        "destination": "about.html"
-      },
-      {
-        "source": "/IV",
-        "destination": "game_pages/1st-game.html"
-      }
-    ]
+    "cleanUrls": true,
+    "trailingSlash": false
   }
 }
