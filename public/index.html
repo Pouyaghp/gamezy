@@ -38,27 +38,35 @@
     <header id="header">
     <!-- Navigation Bar -->
 <div class="navbar">
+  <!-- Left: Logo -->
   <div class="nav-left">
-    <button class="subscribe-btn">Create Account</button>
-    <button class="login-btn">Lgoin</button>
+  <img src="images/logowithgamezy.png" alt="GameZy Logo" class="nav-logo" />
+</div>
+
+  <!-- Center: Menu + Search -->
+  <div class="nav-center">
+    <ul class="nav-menu">
+      <li>
+        <a href="#">Games</a>
+        <ul class="dropdown">
+          <li><a href="#">Shooting</a></li>
+          <li><a href="#">Racing</a></li>
+        </ul>
+      </li>
+      <li><a href="#">Companies</a></li>
+      <li><a href="#">Coming Soon</a></li>
+    </ul>
+    <input type="text" class="search-bar" placeholder="Search..." />
   </div>
 
-  <ul class="nav-menu">
-    <li><a href="#">Games</a>
-      <ul class="dropdown">
-        <li><a href="#">Shooting</a></li>
-        <li><a href="#">Shooting</a></li>
-      </ul>
-    </li>
-    <li><a href="#">Companies</a></li>
-    <li><a href="#">Coming soon</a></li>
-    <li><a href="#">🔍Search</a></li>
-  </ul>
-
-  <div class="logo">
-    <span>Gamezy</span>
+  <!-- Right: Buttons -->
+  <div class="nav-right">
+    <button class="subscribe-btn">Create Account</button>
+    <button class="login-btn">Login</button>
   </div>
 </div>
+
+
     </header>
 
    <!-- Dynamic Game Link -->
@@ -92,9 +100,7 @@
 
   <!-- Scripts -->
   <script src="assets/js/main.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
+
   <script src="database/firebase-config.js"></script>
   <script src="subscribe.js"></script>
 

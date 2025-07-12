@@ -886,87 +886,115 @@ button,
       margin: 1em 0 0 0;
       position: relative; } }
 
-  .navbar {
-    background-color: transparent;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 30px;
-    position: fixed;
-    top: 0;
-    z-index: 999;
-  }
+.navbar {
+  background-color: transparent;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 999;
+}
 
-  .nav-left {
-    display: flex;
-    gap: 10px;
-  }
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  .subscribe-btn, .login-btn {
-    background: #00c569;
-    border: none;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-  }
+.nav-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
 
-  .login-btn {
-    background: #333;
-  }
+.logo-text {
+  font-size: 22px;
+  font-weight: bold;
+  color: orange;
+}
 
-  .nav-menu {
-    list-style: none;
-    display: flex;
-    gap: 20px;
-    margin: 0;
-    padding: 0;
-  }
+.nav-center {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
-  .nav-menu > li {
-    position: relative;
-  }
+.nav-menu {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+}
 
-  .nav-menu > li > a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 10px;
-  }
+.nav-menu > li {
+  position: relative;
+}
 
-  .nav-menu li:hover .dropdown {
-    display: block;
-  }
+.nav-menu > li > a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 10px;
+}
 
-  .dropdown {
-    display: none;
-    position: absolute;
-    top: 40px;
-    right: 0;
-    background-color: #111;
-    padding: 10px;
-    border-radius: 5px;
-  }
+.nav-menu li:hover .dropdown {
+  display: block;
+}
 
-  .dropdown li {
-    list-style: none;
-  }
+.dropdown {
+  display: none;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background-color: #111;
+  padding: 10px;
+  border-radius: 5px;
+  min-width: 150px;
+}
 
-  .dropdown li a {
-    color: #eee;
-    text-decoration: none;
-    display: block;
-    padding: 5px 10px;
-  }
+.dropdown li {
+  list-style: none;
+}
 
-  .dropdown li a:hover {
-    background-color: #6A0DAD;
-  }
+.dropdown li a {
+  color: #eee;
+  text-decoration: none;
+  display: block;
+  padding: 5px 10px;
+}
 
-  .logo {
-    font-size: 24px;
-    font-weight: bold;
-    color: orange;
-  }
+.dropdown li a:hover {
+  background-color: #6A0DAD;
+}
+
+.search-bar {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  outline: none;
+}
+
+.nav-right {
+  display: flex;
+  gap: 10px;
+}
+
+.subscribe-btn, .login-btn {
+  background: #00c569;
+  border: none;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.login-btn {
+  background: #333;
+}
