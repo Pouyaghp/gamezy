@@ -15,6 +15,8 @@ const links = [
 export default function NavBar() {
   const pathname = usePathname()
   const user = useAuthUser()
+  const isAdmin =
+    user?.email?.toLowerCase() === (process.env.NEXT_PUBLIC_ADMIN_EMAIL || '').toLowerCase()
 
   return (
     <header className="mb-8 border-b border-white/10 pb-3">
@@ -35,23 +37,27 @@ export default function NavBar() {
             </Link>
           ))}
 
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="rounded-lg bg-amber-400/20 px-3 py-1 hover:bg-amber-400/30 border border-amber-400/30"
+              title="Admin panel"
+            >
+              Admin
+            </Link>
+          )}
+
           {!user ? (
             <Link href="/auth" className="rounded-lg bg-white/10 px-3 py-1 hover:bg-white/20">
               Sign in
             </Link>
           ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-300 hidden sm:inline">
-                {user.email}
-              </span>
-              <button
-                onClick={() => signOut(auth)}
-                className="rounded-lg bg-white/10 px-3 py-1 hover:bg-white/20"
-                title="Sign out"
-              >
-                Sign out
-              </button>
-            </div>
+            <button
+              onClick={() => signOut(auth)}
+              className="rounded-lg bg-white/10 px-3 py-1 hover:bg-white/20"
+            >
+              Sign out
+            </button>
           )}
         </nav>
       </div>
