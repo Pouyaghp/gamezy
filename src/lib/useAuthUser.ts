@@ -1,5 +1,5 @@
 'use client'
-import { onAuthStateChanged, User } from 'firebase/auth'
+import { onAuthStateChanged, User, signOut } from 'firebase/auth'
 import { auth } from './firebase'
 import { useEffect, useState } from 'react'
 
