@@ -14,13 +14,25 @@ export default function NavBar() {
   return (
     <header className="mb-8 border-b border-white/10 pb-3">
       <div className="flex items-center justify-between">
-        <Link href="/" className="font-bold text-xl text-white">Gamezy</Link>
+        {/* Left side: logo + title */}
+        <Link href="/" className="flex items-center gap-2">
+          <img
+            src="/logo.png"
+            alt="Gamezy Logo"
+            className="w-8 h-8 rounded-md object-cover"
+          />
+          <span className="font-bold text-xl text-white">Gamezy</span>
+        </Link>
+
+        {/* Navigation links */}
         <nav className="flex gap-4">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className={`hover:underline ${pathname === l.href ? 'text-white' : 'text-zinc-300'}`}
+              className={`hover:underline ${
+                pathname === l.href ? 'text-white' : 'text-zinc-300'
+              }`}
             >
               {l.label}
             </Link>
