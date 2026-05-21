@@ -326,3 +326,7 @@ body.cursor-hidden .cursor-dot,body.cursor-hidden .cursor-ring{opacity:0}
 /* ============ HERO LOGO (real emblem) ============ */
 .hero-logo-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
 .hero-logo-glow{position:absolute;inset:-14%;border-radius:50%;background:radial-gradient(circle,rgba(231,167,43,.38),rgba(139,79,198,.20) 45%,transparent 70%);filter:blur(26px);z-index:0;pointer-events:none}
+
+/* brand wordmark sits as one tight unit (no gap between Game and Zy) */
+.brand-name{display:inline-flex;align-items:center}
+.brand-name b{color:var(--gold)}

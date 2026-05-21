@@ -26,7 +26,7 @@ export default function Navbar() {
     <>
       <nav className={"nav" + (scrolled ? " scrolled" : "")}>
         <div className="nav-inner">
-          <Link className="brand" to="/"><BrandMark size={34} /> Game<b>Zy</b></Link>
+          <Link className="brand" to="/"><BrandMark size={34} /><span className="brand-name">Game<b>Zy</b></span></Link>
           <div className="nav-links">
             {LINKS.map(([p, l, end]) => (
               <NavLink key={p} to={p} end={end} className={({ isActive }) => (isActive ? "active" : "")}>{l}</NavLink>
