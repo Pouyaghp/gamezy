@@ -1,0 +1,57 @@
+GAMEZY IMAGE GUIDE
+============================================================
+
+Drop your images into the folders below using these EXACT names.
+Missing files just fall back to coloured placeholders, so add what you like.
+Recommended: JPG. Posters ~600x800 (3:4). Category/scene ~1200x1500 / 1600x900.
+
+1) LOGO
+------------------------------------------------------------
+  public/images/logo.png        (your shield logo, transparent PNG or SVG)
+  public/favicon.svg            (browser tab icon - replace the file)
+
+2) CATEGORY CARD PHOTOS  ->  public/images/categories/
+------------------------------------------------------------
+  Action & Adventure                     ->  action.jpg
+  Shooter (FPS / TPS)                    ->  shooter.jpg
+  RPG & Open World                       ->  rpg.jpg
+  Sports & Racing                        ->  sports.jpg
+  Horror & Survival                      ->  horror.jpg
+  Indie & Creative                       ->  indie.jpg
+
+3) SECTION / SCENE BACKGROUNDS  ->  public/images/scenes/
+------------------------------------------------------------
+  Join-community banner (home + about)     ->  community.jpg
+
+4) GAME COVER PHOTOS  ->  public/images/games/
+------------------------------------------------------------
+  GTA VI                                 ->  gta-vi.jpg
+  Ghost of Yotei                         ->  ghost-of-yotei.jpg
+  Ghost of Tsushima                      ->  ghost-of-tsushima.jpg
+  Marvel's Spider-Man 2                  ->  spider-man-2.jpg
+  Assassin's Creed Shadows               ->  assassins-creed-shadows.jpg
+  Call of Duty: Black Ops 7              ->  cod-black-ops-7.jpg
+  Battlefield 6                          ->  battlefield-6.jpg
+  DOOM: The Dark Ages                    ->  doom-the-dark-ages.jpg
+  Counter-Strike 2                       ->  counter-strike-2.jpg
+  Halo Infinite                          ->  halo-infinite.jpg
+  Elden Ring                             ->  elden-ring.jpg
+  Baldur's Gate 3                        ->  baldurs-gate-3.jpg
+  Cyberpunk 2077                         ->  cyberpunk-2077.jpg
+  Starfield                              ->  starfield.jpg
+  The Witcher 3: Wild Hunt               ->  witcher-3.jpg
+  EA Sports FC 26                        ->  ea-sports-fc-26.jpg
+  Forza Horizon 5                        ->  forza-horizon-5.jpg
+  NBA 2K26                               ->  nba-2k26.jpg
+  Gran Turismo 7                         ->  gran-turismo-7.jpg
+  F1 25                                  ->  f1-25.jpg
+  Resident Evil Village                  ->  resident-evil-village.jpg
+  Resident Evil 4 (Remake)               ->  resident-evil-4-remake.jpg
+  Silent Hill 2 (Remake)                 ->  silent-hill-2-remake.jpg
+  Alan Wake 2                            ->  alan-wake-2.jpg
+  Dead Space (Remake)                    ->  dead-space-remake.jpg
+  Hollow Knight: Silksong                ->  hollow-knight-silksong.jpg
+  Hades II                               ->  hades-2.jpg
+  Stardew Valley                         ->  stardew-valley.jpg
+  Balatro                                ->  balatro.jpg
+  Cocoon                                 ->  cocoon.jpg
