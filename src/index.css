@@ -77,7 +77,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .mobile-menu{display:none}
 
 /* ============ HERO (scroll-scrub) ============ */
-.hero-wrap{position:relative;height:360vh}
+.hero-wrap{position:relative;height:220vh}
 .hero-stage{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .hero-bg{position:absolute;inset:0;background:
    radial-gradient(120% 90% at 50% 0%, rgba(94,42,140,.55), transparent 55%),
