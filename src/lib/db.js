@@ -111,3 +111,28 @@ export async function updateProfile(userId, fields) {
   const { error } = await supabase.from("profiles").update(fields).eq("id", userId);
   if (error) throw error;
 }
+
+/* ---------- Storage (image uploads) ---------- */
+const BUCKET = "game-media";
+
+export async function uploadGameImage(file, slug) {
+  if (!supabaseEnabled) throw new Error("Supabase not configured.");
+  if (!file) throw new Error("No file selected.");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const safeSlug = (slug || "game").toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  const path = "games/" + safeSlug + "-" + Date.now() + "." + ext;
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { cacheControl: "3600", upsert: false });
+  if (error) throw error;
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export async function deleteGameImage(publicUrl) {
+  if (!supabaseEnabled || !publicUrl) return;
+  // Convert public URL back to bucket path
+  const marker = "/storage/v1/object/public/" + BUCKET + "/";
+  const i = publicUrl.indexOf(marker);
+  if (i < 0) return;
+  const path = publicUrl.substring(i + marker.length);
+  await supabase.storage.from(BUCKET).remove([path]);
+}

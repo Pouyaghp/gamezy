@@ -13,13 +13,66 @@ import { catName } from "../data/categories.js";
 import { platName } from "../data/platforms.js";
 import { useAuth } from "../lib/auth.jsx";
 import { supabaseEnabled } from "../lib/supabase.js";
-import { fetchReviews, upsertReview, deleteReview, fetchComments, addComment, deleteComment, fetchFavouriteSlugs, toggleFavourite } from "../lib/db.js";
+import {
+  fetchReviews, upsertReview, deleteReview,
+  fetchComments, addComment, deleteComment,
+  fetchFavouriteSlugs, toggleFavourite,
+} from "../lib/db.js";
 
 function HeartIcon({ filled }) {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "#ff5277" : "none"} stroke={filled ? "#ff5277" : "currentColor"} strokeWidth="2">
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
     </svg>
+  );
+}
+
+/* Build embed URLs for the supported video kinds */
+function videoEmbed(v) {
+  const host = typeof window !== "undefined" ? window.location.hostname : "gamez-y.com";
+  if (v.kind === "youtube") return "https://www.youtube.com/embed/" + v.id;
+  if (v.kind === "twitch-vod") return "https://player.twitch.tv/?video=v" + v.id + "&parent=" + host + "&autoplay=false";
+  if (v.kind === "twitch-live") return "https://player.twitch.tv/?channel=" + v.id + "&parent=" + host + "&autoplay=false&muted=true";
+  return null;
+}
+
+function MediaGallery({ images, videos, fallback }) {
+  const list = [
+    ...(images || []).map((u) => ({ kind: "image", url: u })),
+    ...(videos || []).map((v) => ({ kind: "video", v })),
+  ];
+  if (list.length === 0) {
+    // legacy placeholder screenshots
+    return (
+      <div className="shots">{fallback.map((g, i) => (
+        <div className="shot" key={i}>
+          <div className="poster-ph" style={{ background: "linear-gradient(140deg," + g[0] + "," + g[1] + ")" }}>
+            <div className="ph-glow" /><div className="ph-logo" style={{ opacity: 0.2, width: "32%" }}><Logo size={80} /></div>
+          </div>
+        </div>
+      ))}</div>
+    );
+  }
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14 }}>
+      {list.map((item, i) => {
+        if (item.kind === "image") {
+          return (
+            <a key={i} href={item.url} target="_blank" rel="noreferrer" style={{ display: "block", aspectRatio: "16 / 9", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,.06)" }}>
+              <img src={item.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} loading="lazy" />
+            </a>
+          );
+        }
+        const src = videoEmbed(item.v);
+        const isLive = item.v.kind === "twitch-live";
+        return (
+          <div key={i} style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,.06)", background: "#000" }}>
+            {isLive && <span style={{ position: "absolute", top: 8, left: 8, zIndex: 2, background: "#ff0044", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 4, letterSpacing: 0.5 }}>● LIVE</span>}
+            {src && <iframe src={src} title="Video" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ width: "100%", height: "100%", border: "none" }} />}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -64,16 +117,10 @@ export default function GameDetail() {
   const game = gameBySlug(slug);
   const { user } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
-
-  /* legacy localStorage reviews — used only when Supabase isn't configured */
   const [localReviews, addLocalReview] = useReviews(game ? game.id : 0);
-
-  /* DB-backed state */
   const [dbReviews, setDbReviews] = useState([]);
   const [comments, setComments] = useState([]);
   const [favs, setFavs] = useState([]);
-
-  /* form state */
   const [stars, setStars] = useState(0);
   const [text, setText] = useState("");
   const [toast, setToast] = useState("");
@@ -83,10 +130,8 @@ export default function GameDetail() {
     if (!game || !supabaseEnabled) return;
     const rs = await fetchReviews(game.slug);
     setDbReviews(rs);
-    if (rs.length) {
-      const cs = await fetchComments(rs.map((r) => r.id));
-      setComments(cs);
-    } else setComments([]);
+    if (rs.length) { const cs = await fetchComments(rs.map((r) => r.id)); setComments(cs); }
+    else setComments([]);
     if (user) setFavs(await fetchFavouriteSlugs(user.id));
     else setFavs([]);
   }, [game, user]);
@@ -96,8 +141,6 @@ export default function GameDetail() {
   if (!game) return <NotFound />;
 
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2400); };
-
-  /* combine seed + db (or seed + local) */
   const seed = (game.reviews || []).map((r, i) => ({ id: "seed-" + i, name: r.name, stars: r.stars, text: r.text, when: niceDate(r.date), kind: "seed" }));
   const dbList = dbReviews.map((r) => ({ id: r.id, name: (r.profiles && r.profiles.username) || "Player", stars: r.stars, text: r.text, when: niceDate(r.created_at), kind: "db", user_id: r.user_id }));
   const localList = localReviews.map((r) => ({ id: "loc-" + r.ts, name: r.name, stars: r.stars, text: r.text, when: niceDate(r.ts), kind: "local" }));
@@ -108,8 +151,7 @@ export default function GameDetail() {
   const count = all.length;
   const dist = [5, 4, 3, 2, 1].map((s) => ({ s, n: allStars.filter((x) => Math.round(x) === s).length }));
   const related = GAMES.filter((g) => g.cat === game.cat && g.id !== game.id).sort((a, b) => b.rating - a.rating).slice(0, 5);
-  const shotGrads = [[game.c[0], game.c[1]], [game.c[1], game.c[0]], ["#241433", game.c[1]]];
-
+  const fallbackShots = [[game.c[0], game.c[1]], [game.c[1], game.c[0]], ["#241433", game.c[1]]];
   const isFav = favs.includes(game.slug);
 
   const submit = async (e) => {
@@ -117,31 +159,20 @@ export default function GameDetail() {
     if (!stars || !text.trim()) return;
     if (supabaseEnabled) {
       if (!user) { setAuthOpen(true); return; }
-      try {
-        await upsertReview(game.slug, user.id, stars, text.trim());
-        setStars(0); setText("");
-        await loadAll();
-        showToast("Review posted ★");
-      } catch (e2) { showToast("Error: " + e2.message); }
+      try { await upsertReview(game.slug, user.id, stars, text.trim()); setStars(0); setText(""); await loadAll(); showToast("Review posted ★"); }
+      catch (e2) { showToast("Error: " + e2.message); }
     } else {
       addLocalReview({ name: (user && user.email) || "Player", stars, text: text.trim() });
-      setStars(0); setText("");
-      showToast("Review saved locally");
+      setStars(0); setText(""); showToast("Review saved locally");
     }
   };
-  const removeReview = async (id) => {
-    if (!confirm("Delete your review?")) return;
-    await deleteReview(id);
-    await loadAll();
-  };
+  const removeReview = async (id) => { if (!confirm("Delete your review?")) return; await deleteReview(id); await loadAll(); };
   const addOrAuth = async (reviewId, t) => { await addComment(reviewId, user.id, t); await loadAll(); };
   const removeComment = async (id) => { await deleteComment(id); await loadAll(); };
   const onFav = async () => {
     if (!user) { setAuthOpen(true); return; }
-    try {
-      const next = await toggleFavourite(user.id, game.slug, isFav);
-      setFavs((cur) => (next ? [...cur, game.slug] : cur.filter((s) => s !== game.slug)));
-    } catch (e) { showToast("Error: " + e.message); }
+    try { const next = await toggleFavourite(user.id, game.slug, isFav); setFavs((cur) => (next ? [...cur, game.slug] : cur.filter((s) => s !== game.slug))); }
+    catch (e) { showToast("Error: " + e.message); }
   };
 
   return (
@@ -194,15 +225,11 @@ export default function GameDetail() {
         </div>
 
         <div className="detail-section">
-          <h2>Screenshots</h2>
-          <div className="shots">{shotGrads.map((g, i) => (
-            <div className="shot" key={i}>
-              <div className="poster-ph" style={{ background: "linear-gradient(140deg," + g[0] + "," + g[1] + ")" }}>
-                <div className="ph-glow" /><div className="ph-logo" style={{ opacity: 0.2, width: "32%" }}><Logo size={80} /></div>
-              </div>
-            </div>
-          ))}</div>
-          <p className="muted" style={{ fontSize: 13, marginTop: 10 }}>Placeholder art — drop your own screenshots in by setting an <code>image</code> on the game.</p>
+          <h2>Media</h2>
+          <MediaGallery images={game.images} videos={game.videos} fallback={fallbackShots} />
+          {(!game.images || !game.images.length) && (!game.videos || !game.videos.length) && (
+            <p className="muted" style={{ fontSize: 13, marginTop: 10 }}>No media yet — upload images or paste video URLs in the admin.</p>
+          )}
         </div>
 
         <div className="detail-section">
@@ -231,9 +258,7 @@ export default function GameDetail() {
             <div className="field"><label>Your rating</label><StarPicker value={stars} onChange={setStars} /></div>
             <div className="field"><label>Your review</label><textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="What did you love (or not)? Help other gamers decide…" maxLength={600} /></div>
             <button className="btn btn-gold" type="submit">{supabaseEnabled && !user ? "Sign in to post" : "Post review"}</button>
-            <span className="muted" style={{ fontSize: 13, marginLeft: 14 }}>
-              {supabaseEnabled ? "Visible to everyone." : "Saved in your browser."}
-            </span>
+            <span className="muted" style={{ fontSize: 13, marginLeft: 14 }}>{supabaseEnabled ? "Visible to everyone." : "Saved in your browser."}</span>
           </form>
 
           <div className="review-list">

@@ -222,3 +222,45 @@ Both rebuild automatically on every `git push`.
 - **"new row violates RLS policy"** when posting a review — you're not signed in.
 - **OAuth redirect mismatch** — copy the exact callback URL from Supabase into Google/Discord.
 - **Admin edits don't save to DB** — you forgot step 3 (insert into admins).
+
+---
+
+## Step 8 — Add storage bucket for image uploads (1 min)
+
+The admin lets you upload poster images. Set up a Storage bucket once:
+
+1. Supabase dashboard → **Storage** (left sidebar) → **+ New bucket**
+2. Name: **`game-media`**
+3. Tick **Public bucket** (so everyone can view the images)
+4. Click **Create bucket**
+
+Now add the access policies in **SQL Editor → New query**:
+
+```sql
+-- Public read for everyone
+create policy "Public read game media"
+  on storage.objects for select
+  using (bucket_id = 'game-media');
+
+-- Admins can upload / replace / delete
+create policy "Admins upload game media"
+  on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'game-media'
+    and exists (select 1 from admins where user_id = auth.uid())
+  );
+create policy "Admins update game media"
+  on storage.objects for update to authenticated
+  using (
+    bucket_id = 'game-media'
+    and exists (select 1 from admins where user_id = auth.uid())
+  );
+create policy "Admins delete game media"
+  on storage.objects for delete to authenticated
+  using (
+    bucket_id = 'game-media'
+    and exists (select 1 from admins where user_id = auth.uid())
+  );
+```
+
+Click Run. Now the admin can upload images.
