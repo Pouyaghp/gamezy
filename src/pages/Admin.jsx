@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { BASE_GAMES } from "../data/games.js";
 import { BASE_CATEGORIES } from "../data/categories.js";
@@ -361,6 +361,12 @@ export default function Admin() {
   const [toast, setToast] = useState("");
   const [syncing, setSyncing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const editorRef = useRef(null);
+  useEffect(() => {
+    if (editing && editorRef.current) {
+      editorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [editing]);
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2600); };
 
   useEffect(() => {
@@ -541,7 +547,11 @@ export default function Admin() {
               })}
             </div>
 
-            {editing && <GameEditor key={editing.id} game={editing} cats={cats} onSave={onSaveGame} onCancel={() => setEditing(null)} onDelete={onDeleteGame} canUpload={liveMode} />}
+            {editing && (
+              <div ref={editorRef}>
+                <GameEditor key={editing.id} game={editing} cats={cats} onSave={onSaveGame} onCancel={() => setEditing(null)} onDelete={onDeleteGame} canUpload={liveMode} />
+              </div>
+            )}
           </>
         )}
 
