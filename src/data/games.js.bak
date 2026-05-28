@@ -4,7 +4,7 @@
  * an `image` field to a game, e.g.  image: "/images/gta-vi.jpg"
  * When `image` is omitted, a brand-coloured placeholder poster is shown.
  */
-export const BASE_GAMES = [
+export const GAMES = [
   /* ---- ACTION & ADVENTURE ---- */
   { id: 1, slug: "gta-vi", title: "GTA VI", cat: "action", plat: ["pc", "console"], year: 2026, dev: "Rockstar Games", rating: 4.9, c: ["#d6336c", "#f6c558"],
     tagline: "Welcome back to Vice City.",
@@ -228,18 +228,4 @@ export const BASE_GAMES = [
     reviews: [{ name: "OrbWalker", stars: 5, text: "Every mechanic clicks perfectly. A puzzle masterpiece.", date: "2023-10-01" }, { name: "QuietGamer", stars: 4, text: "So elegant and calming. Short but unforgettable.", date: "2023-11-20" }] },
 ];
 
-// gameBySlug + GAMES override below
-
-/* ---- runtime override layer (admin edits) ---- */
-let _runtime = BASE_GAMES;
-try {
-  if (typeof localStorage !== "undefined") {
-    const v = localStorage.getItem("gamezy_games_v1");
-    if (v) {
-      const parsed = JSON.parse(v);
-      if (Array.isArray(parsed) && parsed.length) _runtime = parsed;
-    }
-  }
-} catch (e) { /* ignore */ }
-export const GAMES = _runtime;
 export const gameBySlug = (s) => GAMES.find((g) => g.slug === s);

@@ -1,4 +1,4 @@
-export const BASE_CATEGORIES = [
+export const CATEGORIES = [
   { key: "action",  name: "Action & Adventure", blurb: "Fast-paced, story-driven games full of combat, exploration, and cinematic moments.", c: ["#5e2a8c", "#e7a72b"] },
   { key: "shooter", name: "Shooter (FPS / TPS)", blurb: "From tactical realism to futuristic battles — all the best first- and third-person shooters.", c: ["#3a1a59", "#c2410c"] },
   { key: "rpg",     name: "RPG & Open World",    blurb: "Immersive worlds, character progression, and deep storytelling experiences.", c: ["#7c3a1d", "#e7a72b"] },
@@ -7,23 +7,5 @@ export const BASE_CATEGORIES = [
   { key: "indie",   name: "Indie & Creative",    blurb: "Unique, artistic, and innovative games made by independent studios.", c: ["#155e63", "#8b4fc6"] },
 ];
 
-// catName + CATEGORIES override below
-
-
-/* ---- runtime override layer (admin edits) ---- */
-let _rt = BASE_CATEGORIES;
-try {
-  if (typeof localStorage !== "undefined") {
-    const v = localStorage.getItem("gamezy_categories_v1");
-    if (v) {
-      const p = JSON.parse(v);
-      if (Array.isArray(p) && p.length) _rt = p;
-    }
-  }
-} catch (e) {}
-export const CATEGORIES = _rt;
 export const catName = (k) => (CATEGORIES.find((c) => c.key === k) || {}).name || k;
-export const catShort = (k) => {
-  const c = CATEGORIES.find((x) => x.key === k);
-  return (c && c.short) || ({ action: "Action", shooter: "Shooter", rpg: "RPG", sports: "Sports", horror: "Horror", indie: "Indie" }[k]) || k;
-};
+export const catShort = (k) => ({ action: "Action", shooter: "Shooter", rpg: "RPG", sports: "Sports", horror: "Horror", indie: "Indie" }[k] || k);

@@ -10,6 +10,8 @@ import GameDetail from "./pages/GameDetail.jsx";
 import Platforms from "./pages/Platforms.jsx";
 import About from "./pages/About.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Admin from "./pages/Admin.jsx";
+import Profile from "./pages/Profile.jsx";
 
 function ScrollToTop() {
   const { pathname, search } = useLocation();
@@ -31,6 +33,8 @@ export default function App() {
           <Route path="/game/:slug" element={<GameDetail />} />
           <Route path="/platforms" element={<Platforms />} />
           <Route path="/about" element={<About />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

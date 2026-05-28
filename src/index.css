@@ -330,3 +330,7 @@ body.cursor-hidden .cursor-dot,body.cursor-hidden .cursor-ring{opacity:0}
 /* brand wordmark sits as one tight unit (no gap between Game and Zy) */
 .brand-name{display:inline-flex;align-items:center}
 .brand-name b{color:var(--gold)}
+
+/* user menu dropdown items */
+.usermenu-item{display:block;width:100%;text-align:left;padding:8px 10px;background:transparent;border:none;color:#e6dff5;font-size:13px;border-radius:6px;cursor:pointer;font-family:inherit}
+.usermenu-item:hover{background:rgba(231,167,43,.12);color:#f6c558}

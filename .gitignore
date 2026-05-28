@@ -5,3 +5,8 @@ dist-ssr
 .DS_Store
 .vscode/*
 !.vscode/extensions.json
+
+# env
+.env
+.env.local
+.env.*.local
