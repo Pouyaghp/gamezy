@@ -81,16 +81,18 @@ create table comments (
 alter table profiles    enable row level security;
 alter table games       enable row level security;
 alter table categories  enable row level security;
+alter table admins      enable row level security;
 alter table reviews     enable row level security;
 alter table favourites  enable row level security;
 alter table comments    enable row level security;
 
 -- Public reads
-create policy "Public read profiles"  on profiles   for select using (true);
-create policy "Public read games"     on games      for select using (true);
+create policy "Public read profiles"   on profiles   for select using (true);
+create policy "Public read games"      on games      for select using (true);
 create policy "Public read categories" on categories for select using (true);
-create policy "Public read reviews"   on reviews    for select using (true);
-create policy "Public read comments"  on comments   for select using (true);
+create policy "Public read admins"     on admins     for select using (true);
+create policy "Public read reviews"    on reviews    for select using (true);
+create policy "Public read comments"   on comments   for select using (true);
 
 -- Profile self-edit
 create policy "Insert own profile" on profiles for insert with check (auth.uid() = id);
