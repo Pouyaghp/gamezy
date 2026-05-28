@@ -58,7 +58,30 @@ export function AuthProvider({ children }) {
     });
     if (error) throw error;
   };
-  const signOut = async () => { if (supabaseEnabled) await supabase.auth.signOut(); };
+
+  const signOut = async () => {
+    // Always wipe local state first so the UI flips immediately
+    setUser(null);
+    setProfile(null);
+    setIsAdmin(false);
+    // Clear the admin session flag too
+    try { sessionStorage.removeItem("gamezy_admin_auth"); } catch (e) {}
+    // Tell Supabase to invalidate the session
+    if (supabaseEnabled) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.warn("[GameZy] supabase.auth.signOut error:", e);
+        // As a last resort, clear all Supabase keys from localStorage
+        try {
+          Object.keys(localStorage).forEach((k) => {
+            if (k.startsWith("sb-") || k.includes("supabase")) localStorage.removeItem(k);
+          });
+        } catch (_) {}
+      }
+    }
+  };
+
   const refreshProfile = async () => { if (user) await loadProfile(user.id); };
 
   return (
