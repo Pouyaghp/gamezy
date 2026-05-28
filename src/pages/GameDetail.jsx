@@ -26,53 +26,91 @@ function HeartIcon({ filled }) {
     </svg>
   );
 }
+function PlayIcon() {
+  return (<svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.6)" /><path d="M22 17 L41 28 L22 39 Z" fill="#fff" /></svg>);
+}
 
-/* Build embed URLs for the supported video kinds */
 function videoEmbed(v) {
   const host = typeof window !== "undefined" ? window.location.hostname : "gamez-y.com";
-  if (v.kind === "youtube") return "https://www.youtube.com/embed/" + v.id;
+  if (v.kind === "youtube") return "https://www.youtube.com/embed/" + v.id + "?rel=0";
   if (v.kind === "twitch-vod") return "https://player.twitch.tv/?video=v" + v.id + "&parent=" + host + "&autoplay=false";
   if (v.kind === "twitch-live") return "https://player.twitch.tv/?channel=" + v.id + "&parent=" + host + "&autoplay=false&muted=true";
   return null;
 }
+function videoThumb(v) {
+  if (v.kind === "youtube") return "https://i.ytimg.com/vi/" + v.id + "/hqdefault.jpg";
+  return null;
+}
+function videoKindLabel(kind) {
+  if (kind === "youtube") return "YouTube";
+  if (kind === "twitch-live") return "Twitch Live";
+  return "Twitch VOD";
+}
 
-function MediaGallery({ images, videos, fallback }) {
-  const list = [
-    ...(images || []).map((u) => ({ kind: "image", url: u })),
-    ...(videos || []).map((v) => ({ kind: "video", v })),
-  ];
-  if (list.length === 0) {
-    // legacy placeholder screenshots
-    return (
-      <div className="shots">{fallback.map((g, i) => (
-        <div className="shot" key={i}>
-          <div className="poster-ph" style={{ background: "linear-gradient(140deg," + g[0] + "," + g[1] + ")" }}>
-            <div className="ph-glow" /><div className="ph-logo" style={{ opacity: 0.2, width: "32%" }}><Logo size={80} /></div>
-          </div>
-        </div>
-      ))}</div>
-    );
-  }
+function FeaturedTrailer({ trailer }) {
+  const [playing, setPlaying] = useState(false);
+  if (!trailer) return null;
+  const src = videoEmbed(trailer);
+  const thumb = videoThumb(trailer);
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14 }}>
-      {list.map((item, i) => {
-        if (item.kind === "image") {
-          return (
-            <a key={i} href={item.url} target="_blank" rel="noreferrer" style={{ display: "block", aspectRatio: "16 / 9", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,.06)" }}>
-              <img src={item.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} loading="lazy" />
-            </a>
-          );
-        }
-        const src = videoEmbed(item.v);
-        const isLive = item.v.kind === "twitch-live";
-        return (
-          <div key={i} style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,.06)", background: "#000" }}>
-            {isLive && <span style={{ position: "absolute", top: 8, left: 8, zIndex: 2, background: "#ff0044", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 4, letterSpacing: 0.5 }}>● LIVE</span>}
-            {src && <iframe src={src} title="Video" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ width: "100%", height: "100%", border: "none" }} />}
-          </div>
-        );
-      })}
+    <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(231,167,43,.25)", background: "#000" }}>
+      <span style={{ position: "absolute", top: 12, left: 12, zIndex: 2, background: "linear-gradient(135deg,#5e2a8c,#e7a72b)", color: "#fff", fontSize: 12, fontWeight: 700, padding: "5px 12px", borderRadius: 6, letterSpacing: 0.5 }}>OFFICIAL TRAILER</span>
+      {playing && src ? (
+        <iframe src={src + (trailer.kind === "youtube" ? "&autoplay=1" : "&autoplay=true")} title="Trailer" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ width: "100%", height: "100%", border: "none" }} />
+      ) : (
+        <button onClick={() => setPlaying(true)} style={{ position: "absolute", inset: 0, border: "none", padding: 0, cursor: "pointer", background: "#000" }}>
+          {thumb && <img src={thumb} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }} />}
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><PlayIcon /></div>
+        </button>
+      )}
     </div>
+  );
+}
+
+function VideoCard({ v }) {
+  const [playing, setPlaying] = useState(false);
+  const src = videoEmbed(v);
+  const thumb = videoThumb(v);
+  const isLive = v.kind === "twitch-live";
+  return (
+    <div style={{ background: "rgba(20,15,30,.6)", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,.07)" }}>
+      <div style={{ position: "relative", aspectRatio: "16 / 9", background: "#000" }}>
+        {isLive && <span style={{ position: "absolute", top: 8, left: 8, zIndex: 2, background: "#ff0044", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 4 }}>● LIVE</span>}
+        {playing && src ? (
+          <iframe src={src + (v.kind === "youtube" ? "&autoplay=1" : "&autoplay=true")} title="Video" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ width: "100%", height: "100%", border: "none" }} />
+        ) : (
+          <button onClick={() => setPlaying(true)} style={{ position: "absolute", inset: 0, border: "none", padding: 0, cursor: "pointer", background: "#000" }}>
+            {thumb && <img src={thumb} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }} />}
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><PlayIcon /></div>
+          </button>
+        )}
+      </div>
+      <div style={{ padding: "10px 14px", display: "flex", gap: 10, alignItems: "center" }}>
+        <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: v.kind === "youtube" ? "rgba(204,0,0,.85)" : "rgba(145,70,255,.85)", color: "#fff", fontWeight: 600 }}>{videoKindLabel(v.kind)}</span>
+        {v.label && <span style={{ fontSize: 13, color: "#f6c558", fontWeight: 600 }}>{v.label}</span>}
+      </div>
+    </div>
+  );
+}
+
+function MediaGallery({ images }) {
+  const [open, setOpen] = useState(null);
+  if (!images || !images.length) return null;
+  return (
+    <>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14 }}>
+        {images.map((u, i) => (
+          <button key={u} onClick={() => setOpen(u)} style={{ aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,.07)", padding: 0, background: "#000", cursor: "pointer" }}>
+            <img src={u} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} loading="lazy" />
+          </button>
+        ))}
+      </div>
+      {open && (
+        <div onClick={() => setOpen(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.92)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 40, cursor: "zoom-out" }}>
+          <img src={open} alt="" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 8 }} />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -95,9 +133,7 @@ function CommentBlock({ reviewId, comments, onAdd, onDelete, user, openAuth }) {
             <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
               <b style={{ color: "#f6c558" }}>{name}</b>
               <span className="muted" style={{ fontSize: 12 }}>{niceDate(c.created_at)}</span>
-              {user && user.id === c.user_id && (
-                <button onClick={() => onDelete(c.id)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ff7373", fontSize: 11, cursor: "pointer" }}>Delete</button>
-              )}
+              {user && user.id === c.user_id && <button onClick={() => onDelete(c.id)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ff7373", fontSize: 11, cursor: "pointer" }}>Delete</button>}
             </div>
             <p className="muted" style={{ fontSize: 14, marginTop: 2 }}>{c.text}</p>
           </div>
@@ -141,18 +177,29 @@ export default function GameDetail() {
   if (!game) return <NotFound />;
 
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2400); };
+
+  /* media + videos (with legacy fallbacks) */
+  const gallery = Array.isArray(game.media)
+    ? game.media
+    : (Array.isArray(game.images) ? game.images.filter((u) => u !== game.poster && u !== game.image) : []);
+  const trailer = game.trailer || null;
+  const otherVideos = Array.isArray(game.videos) ? game.videos.filter((v) => v && v.kind && v.id && (!trailer || v.id !== trailer.id)) : [];
+  // Group videos by label
+  const groups = {};
+  otherVideos.forEach((v) => { const k = v.label || "Other"; (groups[k] = groups[k] || []).push(v); });
+  const groupOrder = ["Gameplay", "Reaction", "Review", "Walkthrough", "Speedrun", "Cinematic", "Other"].filter((k) => groups[k]);
+
   const seed = (game.reviews || []).map((r, i) => ({ id: "seed-" + i, name: r.name, stars: r.stars, text: r.text, when: niceDate(r.date), kind: "seed" }));
   const dbList = dbReviews.map((r) => ({ id: r.id, name: (r.profiles && r.profiles.username) || "Player", stars: r.stars, text: r.text, when: niceDate(r.created_at), kind: "db", user_id: r.user_id }));
   const localList = localReviews.map((r) => ({ id: "loc-" + r.ts, name: r.name, stars: r.stars, text: r.text, when: niceDate(r.ts), kind: "local" }));
   const all = supabaseEnabled ? [...dbList, ...seed] : [...localList, ...seed];
-
   const allStars = all.map((r) => r.stars);
   const community = allStars.length ? avg(allStars) : game.rating;
   const count = all.length;
   const dist = [5, 4, 3, 2, 1].map((s) => ({ s, n: allStars.filter((x) => Math.round(x) === s).length }));
   const related = GAMES.filter((g) => g.cat === game.cat && g.id !== game.id).sort((a, b) => b.rating - a.rating).slice(0, 5);
-  const fallbackShots = [[game.c[0], game.c[1]], [game.c[1], game.c[0]], ["#241433", game.c[1]]];
   const isFav = favs.includes(game.slug);
+  const hasAnyMedia = (trailer || gallery.length > 0 || otherVideos.length > 0);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -214,6 +261,14 @@ export default function GameDetail() {
       </section>
 
       <section className="section" style={{ paddingTop: 20 }}><div className="wrap">
+
+        {/* TRAILER (top of fold if present) */}
+        {trailer && (
+          <div className="detail-section">
+            <FeaturedTrailer trailer={trailer} />
+          </div>
+        )}
+
         <div className="detail-section">
           <h2>About this game</h2>
           <p style={{ fontSize: 17, maxWidth: 820 }}>{game.about}</p>
@@ -224,13 +279,36 @@ export default function GameDetail() {
           <ul className="feature-list">{game.features.map((f, i) => <li key={i}><ICheck /><span>{f}</span></li>)}</ul>
         </div>
 
-        <div className="detail-section">
-          <h2>Media</h2>
-          <MediaGallery images={game.images} videos={game.videos} fallback={fallbackShots} />
-          {(!game.images || !game.images.length) && (!game.videos || !game.videos.length) && (
-            <p className="muted" style={{ fontSize: 13, marginTop: 10 }}>No media yet — upload images or paste video URLs in the admin.</p>
-          )}
-        </div>
+        {/* MEDIA GALLERY (additional images/screenshots) */}
+        {gallery.length > 0 && (
+          <div className="detail-section">
+            <h2>Screenshots &amp; media</h2>
+            <MediaGallery images={gallery} />
+          </div>
+        )}
+
+        {/* GROUPED VIDEOS */}
+        {groupOrder.length > 0 && (
+          <div className="detail-section">
+            <h2>Videos</h2>
+            {groupOrder.map((label) => (
+              <div key={label} style={{ marginBottom: 28 }}>
+                <h3 className="gold-text" style={{ fontSize: 18, marginBottom: 12, opacity: 0.85 }}>{label}</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 14 }}>
+                  {groups[label].map((v, i) => <VideoCard key={i} v={v} />)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* fallback: no media at all → show placeholder */}
+        {!hasAnyMedia && (
+          <div className="detail-section">
+            <h2>Media</h2>
+            <p className="muted" style={{ fontSize: 14 }}>No media yet — an admin can upload images and add YouTube/Twitch videos.</p>
+          </div>
+        )}
 
         <div className="detail-section">
           <h2>Community reviews</h2>
@@ -256,7 +334,7 @@ export default function GameDetail() {
               </p>
             )}
             <div className="field"><label>Your rating</label><StarPicker value={stars} onChange={setStars} /></div>
-            <div className="field"><label>Your review</label><textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="What did you love (or not)? Help other gamers decide…" maxLength={600} /></div>
+            <div className="field"><label>Your review</label><textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="What did you love (or not)?" maxLength={600} /></div>
             <button className="btn btn-gold" type="submit">{supabaseEnabled && !user ? "Sign in to post" : "Post review"}</button>
             <span className="muted" style={{ fontSize: 13, marginLeft: 14 }}>{supabaseEnabled ? "Visible to everyone." : "Saved in your browser."}</span>
           </form>

@@ -8,7 +8,7 @@ import { catShort } from "../data/categories.js";
    placeholder that uses your real GameZy logo. */
 export function GamePoster({ game, showTitle = true }) {
   const [err, setErr] = useState(false);
-  const src = game.image || "/images/games/" + game.slug + ".jpg";
+  const src = game.poster || game.image || "/images/games/" + game.slug + ".jpg";
   if (!err) {
     return (
       <img src={src} alt={game.title} loading="lazy" onError={() => setErr(true)}

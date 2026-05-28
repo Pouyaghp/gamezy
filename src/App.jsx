@@ -11,6 +11,7 @@ import Platforms from "./pages/Platforms.jsx";
 import About from "./pages/About.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Admin from "./pages/Admin.jsx";
+import AdminEdit from "./pages/AdminEdit.jsx";
 import Profile from "./pages/Profile.jsx";
 
 function ScrollToTop() {
@@ -34,6 +35,8 @@ export default function App() {
           <Route path="/platforms" element={<Platforms />} />
           <Route path="/about" element={<About />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/new" element={<AdminEdit />} />
+          <Route path="/admin/edit/:slug" element={<AdminEdit />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

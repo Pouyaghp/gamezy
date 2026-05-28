@@ -1,8 +1,7 @@
-import { useState, useEffect, useMemo, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { BASE_GAMES } from "../data/games.js";
 import { BASE_CATEGORIES } from "../data/categories.js";
-import { PLATFORMS } from "../data/platforms.js";
 import { useAuth } from "../lib/auth.jsx";
 import { supabaseEnabled } from "../lib/supabase.js";
 import AuthModal from "../components/AuthModal.jsx";
@@ -10,7 +9,6 @@ import {
   fetchLiveGames, fetchLiveCategories,
   upsertGames, deleteGameById,
   upsertCategories, deleteCategoryByKey,
-  uploadGameImage, deleteGameImage,
 } from "../lib/db.js";
 
 const ADMIN_PASSWORD = "gamezy2026";
@@ -28,13 +26,7 @@ function loadLocalCats() {
 }
 function saveLocalGames(g) { localStorage.setItem(LS_GAMES, JSON.stringify(g)); }
 function saveLocalCats(c)  { localStorage.setItem(LS_CATS,  JSON.stringify(c)); }
-
-function slugify(s) {
-  return String(s || "").toLowerCase().trim()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+function slugify(s) { return String(s || "").toLowerCase().trim().replace(/['"]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
 
 function exportGamesJs(games) {
   const body = games.map((g) => "  " + JSON.stringify(g)).join(",\n");
@@ -62,218 +54,33 @@ export const catShort = (k) => { const c = CATEGORIES.find((x) => x.key === k); 
 function downloadText(name, text) {
   const blob = new Blob([text], { type: "text/javascript;charset=utf-8" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = name;
+  const a = document.createElement("a"); a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/* Detect & normalise video URLs (YouTube + Twitch) */
-function detectVideo(url) {
-  if (!url) return null;
-  const u = url.trim();
-  // YouTube
-  let m = u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
-  if (m) return { kind: "youtube", id: m[1] };
-  // Twitch VOD
-  m = u.match(/twitch\.tv\/videos\/(\d+)/);
-  if (m) return { kind: "twitch-vod", id: m[1] };
-  // Twitch channel (live)
-  m = u.match(/twitch\.tv\/(?!videos)([A-Za-z0-9_]+)(?:\/|$)/);
-  if (m) return { kind: "twitch-live", id: m[1] };
-  return null;
-}
-
-/* =================== LOGIN GATE =================== */
 function LoginGate({ onAuth, openSupabaseAuth }) {
-  const [pw, setPw] = useState("");
-  const [err, setErr] = useState("");
-  const submit = (e) => {
-    e.preventDefault();
-    if (pw === ADMIN_PASSWORD) { sessionStorage.setItem(SS_AUTH, "1"); onAuth(); }
-    else { setErr("Wrong password. Try again."); setPw(""); }
-  };
+  const [pw, setPw] = useState(""); const [err, setErr] = useState("");
+  const submit = (e) => { e.preventDefault(); if (pw === ADMIN_PASSWORD) { sessionStorage.setItem(SS_AUTH, "1"); onAuth(); } else { setErr("Wrong password."); setPw(""); } };
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <form onSubmit={submit} style={{ background: "rgba(28,22,40,.85)", border: "1px solid rgba(231,167,43,.3)", borderRadius: 14, padding: 28, maxWidth: 400, width: "100%" }}>
         <h1 className="gold-text" style={{ fontSize: 26, marginBottom: 6 }}>GameZy Admin</h1>
-        <p className="muted" style={{ fontSize: 13, marginBottom: 18 }}>
-          {supabaseEnabled ? <>Use your GameZy account (must be flagged as admin) for live edits, or the local password for offline edits.</> : <>Enter the admin password to continue.</>}
-        </p>
-        {supabaseEnabled && (
-          <>
-            <button type="button" className="btn btn-purple" onClick={openSupabaseAuth} style={{ width: "100%", marginBottom: 10 }}>Sign in with my GameZy account</button>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0" }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,.08)" }} />
-              <span className="muted" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>or local password</span>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,.08)" }} />
-            </div>
-          </>
-        )}
+        <p className="muted" style={{ fontSize: 13, marginBottom: 18 }}>{supabaseEnabled ? <>Sign in with your GameZy admin account for live edits.</> : <>Enter the admin password to continue.</>}</p>
+        {supabaseEnabled && (<>
+          <button type="button" className="btn btn-purple" onClick={openSupabaseAuth} style={{ width: "100%", marginBottom: 10 }}>Sign in with my GameZy account</button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,.08)" }} />
+            <span className="muted" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>or local password</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,.08)" }} />
+          </div>
+        </>)}
         <input type="password" placeholder="Local admin password" value={pw} onChange={(e) => setPw(e.target.value)} autoFocus
           style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,.15)", background: "rgba(0,0,0,.35)", color: "#fff", fontSize: 16 }} />
         {err && <div style={{ color: "#ff6b6b", marginTop: 10, fontSize: 13 }}>{err}</div>}
         <button className="btn btn-gold" type="submit" style={{ marginTop: 14, width: "100%" }}>Use local password</button>
         <div style={{ marginTop: 16, textAlign: "center" }}><Link to="/" className="muted" style={{ fontSize: 13 }}>&larr; Back to site</Link></div>
       </form>
-    </div>
-  );
-}
-
-function emptyGame() {
-  const id = Date.now();
-  return {
-    id, slug: "new-game-" + id, title: "New Game",
-    cat: "action", plat: ["pc"], year: new Date().getFullYear(),
-    dev: "Studio", rating: 4.0, c: ["#5e2a8c", "#e7a72b"],
-    tagline: "", summary: "", about: "",
-    features: [], tags: [], reviews: [],
-    images: [], videos: [],
-  };
-}
-
-/* =================== GAME EDITOR (with media) =================== */
-function GameEditor({ game, cats, onSave, onCancel, onDelete, canUpload }) {
-  const [g, setG] = useState(() => {
-    const base = JSON.parse(JSON.stringify(game));
-    if (!Array.isArray(base.images)) base.images = base.image ? [base.image] : [];
-    if (!Array.isArray(base.videos)) base.videos = [];
-    return base;
-  });
-  const set = (k, v) => setG((x) => ({ ...x, [k]: v }));
-  const setPlat = (key) => {
-    const arr = g.plat.includes(key) ? g.plat.filter((p) => p !== key) : [...g.plat, key];
-    set("plat", arr);
-  };
-  const [uploading, setUploading] = useState(false);
-  const [videoUrl, setVideoUrl] = useState("");
-  const [videoErr, setVideoErr] = useState("");
-
-  const onPickFile = async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const url = await uploadGameImage(file, g.slug || g.title);
-      set("images", [...(g.images || []), url]);
-      if (!g.image) set("image", url); // first upload also becomes poster
-    } catch (err) { alert("Upload failed: " + err.message); }
-    finally { setUploading(false); e.target.value = ""; }
-  };
-  const removeImage = async (url) => {
-    const next = g.images.filter((u) => u !== url);
-    set("images", next);
-    if (g.image === url) set("image", next[0] || "");
-    if (canUpload) { try { await deleteGameImage(url); } catch (e) {} }
-  };
-  const addVideo = () => {
-    setVideoErr("");
-    const det = detectVideo(videoUrl);
-    if (!det) { setVideoErr("Couldn't recognise that URL. Use a YouTube, Twitch VOD or twitch.tv/<channel> URL."); return; }
-    set("videos", [...(g.videos || []), { ...det, url: videoUrl.trim() }]);
-    setVideoUrl("");
-  };
-  const removeVideo = (i) => set("videos", g.videos.filter((_, idx) => idx !== i));
-
-  const save = () => {
-    const clean = { ...g };
-    clean.slug = slugify(g.slug || g.title);
-    clean.rating = Math.max(0, Math.min(5, parseFloat(g.rating) || 0));
-    clean.year = parseInt(g.year) || new Date().getFullYear();
-    clean.features = (g.features || []).filter((x) => x && x.trim());
-    clean.tags = (g.tags || []).filter((x) => x && x.trim());
-    clean.plat = g.plat && g.plat.length ? g.plat : ["pc"];
-    if (!clean.c || clean.c.length !== 2) clean.c = ["#5e2a8c", "#e7a72b"];
-    clean.images = clean.images || [];
-    clean.videos = clean.videos || [];
-    if (!clean.image && clean.images.length) clean.image = clean.images[0];
-    onSave(clean);
-  };
-
-  const row = { display: "grid", gridTemplateColumns: "160px 1fr", gap: 12, alignItems: "center", marginBottom: 12 };
-  const lab = { color: "#cbb8e4", fontSize: 13 };
-  const inp = { width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,.12)", background: "rgba(0,0,0,.3)", color: "#fff", fontSize: 14 };
-
-  return (
-    <div style={{ background: "rgba(20,15,30,.9)", border: "1px solid rgba(231,167,43,.25)", borderRadius: 14, padding: 22, marginTop: 16 }}>
-      <h3 className="gold-text" style={{ fontSize: 20, marginBottom: 16 }}>{game.id ? "Edit game" : "New game"}</h3>
-
-      <div style={row}><label style={lab}>Title</label><input style={inp} value={g.title} onChange={(e) => set("title", e.target.value)} /></div>
-      <div style={row}><label style={lab}>Slug (URL)</label><input style={inp} value={g.slug} onChange={(e) => set("slug", e.target.value)} /></div>
-      <div style={row}><label style={lab}>Category</label>
-        <select style={inp} value={g.cat} onChange={(e) => set("cat", e.target.value)}>
-          {cats.map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}
-        </select></div>
-      <div style={row}><label style={lab}>Platforms</label>
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-          {PLATFORMS.map((p) => (
-            <label key={p.key} style={{ display: "flex", alignItems: "center", gap: 6, color: "#cbb8e4", fontSize: 14 }}>
-              <input type="checkbox" checked={g.plat.includes(p.key)} onChange={() => setPlat(p.key)} />{p.name}
-            </label>
-          ))}
-        </div></div>
-      <div style={row}><label style={lab}>Year</label><input style={inp} type="number" value={g.year} onChange={(e) => set("year", e.target.value)} /></div>
-      <div style={row}><label style={lab}>Developer</label><input style={inp} value={g.dev} onChange={(e) => set("dev", e.target.value)} /></div>
-      <div style={row}><label style={lab}>Rating (0-5)</label><input style={inp} type="number" step="0.1" min="0" max="5" value={g.rating} onChange={(e) => set("rating", e.target.value)} /></div>
-      <div style={row}><label style={lab}>Colour 1</label><input style={{ ...inp, height: 40, padding: 4 }} type="color" value={g.c[0]} onChange={(e) => set("c", [e.target.value, g.c[1]])} /></div>
-      <div style={row}><label style={lab}>Colour 2</label><input style={{ ...inp, height: 40, padding: 4 }} type="color" value={g.c[1]} onChange={(e) => set("c", [g.c[0], e.target.value])} /></div>
-      <div style={row}><label style={lab}>Tagline</label><input style={inp} value={g.tagline} onChange={(e) => set("tagline", e.target.value)} /></div>
-      <div style={row}><label style={lab}>Summary</label><textarea style={{ ...inp, minHeight: 70 }} value={g.summary} onChange={(e) => set("summary", e.target.value)} /></div>
-      <div style={row}><label style={lab}>About (long)</label><textarea style={{ ...inp, minHeight: 110 }} value={g.about} onChange={(e) => set("about", e.target.value)} /></div>
-      <div style={row}><label style={lab}>Features (one per line)</label><textarea style={{ ...inp, minHeight: 90 }} value={(g.features || []).join("\n")} onChange={(e) => set("features", e.target.value.split("\n"))} /></div>
-      <div style={row}><label style={lab}>Tags (comma separated)</label><input style={inp} value={(g.tags || []).join(", ")} onChange={(e) => set("tags", e.target.value.split(",").map((x) => x.trim()))} /></div>
-
-      {/* ---- MEDIA ---- */}
-      <h4 className="gold-text" style={{ fontSize: 16, margin: "18px 0 8px" }}>Images</h4>
-      <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>The first image is used as the poster. Upload as many as you like.</p>
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
-        {(g.images || []).map((u, i) => (
-          <div key={u} style={{ position: "relative", width: 110, height: 150, borderRadius: 8, overflow: "hidden", border: i === 0 ? "2px solid #f6c558" : "1px solid rgba(255,255,255,.1)" }}>
-            <img src={u} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            {i === 0 && <span style={{ position: "absolute", top: 4, left: 4, background: "#f6c558", color: "#1a0e2e", fontSize: 10, padding: "1px 5px", borderRadius: 4, fontWeight: 700 }}>POSTER</span>}
-            <button onClick={() => removeImage(u)} style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,.7)", border: "none", color: "#fff", borderRadius: 4, cursor: "pointer", fontSize: 11, padding: "2px 6px" }}>×</button>
-          </div>
-        ))}
-        {canUpload ? (
-          <label style={{ width: 110, height: 150, borderRadius: 8, border: "2px dashed rgba(231,167,43,.4)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#cbb8e4", fontSize: 12, textAlign: "center", padding: 6 }}>
-            <input type="file" accept="image/*" onChange={onPickFile} style={{ display: "none" }} disabled={uploading} />
-            {uploading ? "Uploading…" : <><span style={{ fontSize: 22 }}>+</span><br />Upload image</>}
-          </label>
-        ) : (
-          <div style={{ padding: 10, fontSize: 12 }} className="muted">Sign in as an admin (Supabase) to upload. Local password mode can only paste URLs.</div>
-        )}
-      </div>
-      <div style={row}><label style={lab}>Or image URL</label>
-        <input style={inp} placeholder="https://... or /images/games/your-slug.jpg"
-          value={g.image || ""} onChange={(e) => set("image", e.target.value)} /></div>
-
-      <h4 className="gold-text" style={{ fontSize: 16, margin: "18px 0 8px" }}>Videos &amp; live streams</h4>
-      <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>Paste a YouTube URL, a Twitch VOD URL, or a Twitch channel URL (for live streams).</p>
-      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-        <input style={{ ...inp, flex: 1 }} placeholder="https://youtube.com/watch?v=… or twitch.tv/…" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
-        <button type="button" className="btn btn-purple btn-sm" onClick={addVideo}>+ Add</button>
-      </div>
-      {videoErr && <div style={{ color: "#ff7373", fontSize: 12, marginBottom: 8 }}>{videoErr}</div>}
-      <div style={{ display: "grid", gap: 8 }}>
-        {(g.videos || []).map((v, i) => (
-          <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", background: "rgba(0,0,0,.25)", padding: "8px 12px", borderRadius: 8 }}>
-            <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: v.kind === "youtube" ? "#cc0000" : v.kind === "twitch-live" ? "#9146FF" : "#5c2c8c", color: "#fff", fontWeight: 600 }}>
-              {v.kind === "youtube" ? "YouTube" : v.kind === "twitch-live" ? "Twitch Live" : "Twitch VOD"}
-            </span>
-            <span style={{ flex: 1, fontSize: 12, color: "#cbb8e4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.url}</span>
-            <button onClick={() => removeVideo(i)} className="btn btn-sm" style={{ background: "#5a1a1a", color: "#fff", padding: "2px 8px" }}>Remove</button>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: "flex", gap: 10, marginTop: 22, flexWrap: "wrap" }}>
-        <button className="btn btn-gold" onClick={save}>Save</button>
-        <button className="btn btn-purple" onClick={onCancel}>Cancel</button>
-        {game.id && onDelete && (
-          <button className="btn" style={{ background: "#7a1c1c", color: "#fff", marginLeft: "auto" }}
-            onClick={() => { if (confirm("Delete \"" + g.title + "\"?")) onDelete(g.id); }}>Delete game</button>
-        )}
-      </div>
     </div>
   );
 }
@@ -285,9 +92,7 @@ function CategoryEditor({ cats, onSet, games }) {
   const save = () => {
     const key = slugify(editing.key || editing.name);
     const e = { ...editing, key }; delete e.__origKey;
-    let next;
-    if (isNew) next = [...cats, e];
-    else next = cats.map((c) => (c.key === editing.__origKey ? e : c));
+    const next = isNew ? [...cats, e] : cats.map((c) => (c.key === editing.__origKey ? e : c));
     onSet(next); setEditing(null);
   };
   const remove = (key) => {
@@ -344,29 +149,22 @@ function CategoryEditor({ cats, onSet, games }) {
   );
 }
 
-/* =================== MAIN ADMIN =================== */
 export default function Admin() {
   const { user, isAdmin } = useAuth();
   const [localAuthed, setLocalAuthed] = useState(() => sessionStorage.getItem(SS_AUTH) === "1");
   const [authOpen, setAuthOpen] = useState(false);
   const liveMode = supabaseEnabled && user && isAdmin;
   const authed = liveMode || localAuthed;
+  const navigate = useNavigate();
 
   const [tab, setTab] = useState("games");
   const [games, setGames] = useState([]);
   const [cats, setCats] = useState([]);
-  const [editing, setEditing] = useState(null);
   const [q, setQ] = useState("");
   const [filterCat, setFilterCat] = useState("");
   const [toast, setToast] = useState("");
   const [syncing, setSyncing] = useState(false);
   const [busy, setBusy] = useState(false);
-  const editorRef = useRef(null);
-  useEffect(() => {
-    if (editing && editorRef.current) {
-      editorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [editing]);
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2600); };
 
   useEffect(() => {
@@ -374,15 +172,11 @@ export default function Admin() {
     (async () => {
       if (liveMode) {
         setSyncing(true);
-        const liveG = await fetchLiveGames();
-        const liveC = await fetchLiveCategories();
+        const liveG = await fetchLiveGames(); const liveC = await fetchLiveCategories();
         setGames(liveG && liveG.length ? liveG : loadLocalGames());
         setCats(liveC && liveC.length ? liveC : loadLocalCats());
         setSyncing(false);
-      } else {
-        setGames(loadLocalGames());
-        setCats(loadLocalCats());
-      }
+      } else { setGames(loadLocalGames()); setCats(loadLocalCats()); }
     })();
   }, [authed, liveMode]);
 
@@ -394,53 +188,31 @@ export default function Admin() {
   const pushCats = async (next, removedKey) => {
     saveLocalCats(next); setCats(next);
     if (liveMode) {
-      try {
-        await upsertCategories(next);
-        if (removedKey) await deleteCategoryByKey(removedKey);
-        showToast("Saved live ✓");
-      } catch (e) { showToast("DB error: " + e.message); }
+      try { await upsertCategories(next); if (removedKey) await deleteCategoryByKey(removedKey); showToast("Saved live ✓"); }
+      catch (e) { showToast("DB error: " + e.message); }
     } else showToast("Saved locally.");
   };
-
-  const onSaveGame = async (g) => {
-    const next = games.find((x) => x.id === g.id) ? games.map((x) => (x.id === g.id ? g : x)) : [...games, g];
-    await pushGames(next);
-    setEditing(null);
-  };
   const onDeleteGame = async (id) => {
-    const target = games.find((g) => g.id === id);
+    if (!confirm("Delete this game?")) return;
     const next = games.filter((g) => g.id !== id);
     saveLocalGames(next); setGames(next);
-    setEditing(null);
-    if (liveMode) {
-      try { await deleteGameById(id); showToast("Deleted live ✓"); }
-      catch (e) { showToast("DB error: " + e.message); }
-      // Best-effort cleanup of uploaded images
-      if (target && target.images) target.images.forEach((u) => { try { deleteGameImage(u); } catch (e) {} });
-    } else showToast("Deleted locally.");
+    if (liveMode) { try { await deleteGameById(id); showToast("Deleted ✓"); } catch (e) { showToast("DB error: " + e.message); } }
+    else showToast("Deleted locally.");
   };
   const move = async (id, dir) => {
-    const i = games.findIndex((g) => g.id === id);
-    const j = i + dir;
+    const i = games.findIndex((g) => g.id === id); const j = i + dir;
     if (i < 0 || j < 0 || j >= games.length) return;
-    const next = games.slice(); [next[i], next[j]] = [next[j], next[i]];
-    await pushGames(next);
+    const next = games.slice(); [next[i], next[j]] = [next[j], next[i]]; await pushGames(next);
   };
-
   const importDefaults = async () => {
-    if (!confirm("Import all " + BASE_GAMES.length + " default games and " + BASE_CATEGORIES.length + " categories into the database? Existing rows with the same id/key will be overwritten.")) return;
+    if (!confirm("Import all " + BASE_GAMES.length + " default games and " + BASE_CATEGORIES.length + " categories?")) return;
     setBusy(true);
     try {
       const baseG = JSON.parse(JSON.stringify(BASE_GAMES));
       const baseC = JSON.parse(JSON.stringify(BASE_CATEGORIES));
-      // Normalise: ensure images/videos arrays exist
-      baseG.forEach((g) => { if (!g.images) g.images = g.image ? [g.image] : []; if (!g.videos) g.videos = []; });
-      if (liveMode) {
-        await upsertCategories(baseC);
-        await upsertGames(baseG);
-      }
-      saveLocalGames(baseG); saveLocalCats(baseC);
-      setGames(baseG); setCats(baseC);
+      baseG.forEach((g) => { if (!g.poster) g.poster = g.image || ""; if (!g.media) g.media = []; if (!g.videos) g.videos = []; if (!g.trailer) g.trailer = null; });
+      if (liveMode) { await upsertCategories(baseC); await upsertGames(baseG); }
+      saveLocalGames(baseG); saveLocalCats(baseC); setGames(baseG); setCats(baseC);
       showToast("Imported defaults ✓");
     } catch (e) { showToast("Import failed: " + e.message); }
     finally { setBusy(false); }
@@ -456,13 +228,12 @@ export default function Admin() {
   }, [games, q, filterCat]);
 
   const exportGames = () => downloadText("games.js", exportGamesJs(games));
-  const exportCats  = () => downloadText("categories.js", exportCatsJs(cats));
+  const exportCats = () => downloadText("categories.js", exportCatsJs(cats));
   const resetAll = () => {
-    if (!confirm("Reset to defaults? Clears local edits.")) return;
+    if (!confirm("Reset local edits to defaults?")) return;
     localStorage.removeItem(LS_GAMES); localStorage.removeItem(LS_CATS);
-    setGames(JSON.parse(JSON.stringify(BASE_GAMES)));
-    setCats(JSON.parse(JSON.stringify(BASE_CATEGORIES)));
-    showToast("Reset to defaults.");
+    setGames(JSON.parse(JSON.stringify(BASE_GAMES))); setCats(JSON.parse(JSON.stringify(BASE_CATEGORIES)));
+    showToast("Reset.");
   };
   const localLogout = () => { sessionStorage.removeItem(SS_AUTH); setLocalAuthed(false); };
 
@@ -472,21 +243,18 @@ export default function Admin() {
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </>);
   }
-
   if (supabaseEnabled && user && !isAdmin && !localAuthed) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
         <div style={{ background: "rgba(28,22,40,.85)", border: "1px solid rgba(231,167,43,.3)", borderRadius: 14, padding: 28, maxWidth: 460, textAlign: "center" }}>
           <h2 className="gold-text" style={{ fontSize: 22, marginBottom: 8 }}>Not an admin</h2>
-          <p className="muted" style={{ fontSize: 14, marginBottom: 16 }}>Your account ({user.email}) isn't flagged as a GameZy admin. Add your UID to the <code>admins</code> table.</p>
+          <p className="muted" style={{ fontSize: 14, marginBottom: 16 }}>Your account ({user.email}) isn't flagged as a GameZy admin.</p>
           <code style={{ display: "block", padding: 10, background: "rgba(0,0,0,.4)", borderRadius: 6, fontSize: 12, marginBottom: 16, wordBreak: "break-all" }}>{user.id}</code>
           <Link to="/" className="btn btn-purple btn-sm">Back to site</Link>
         </div>
       </div>
     );
   }
-
-  const btnRow = { display: "flex", gap: 8, flexWrap: "wrap" };
 
   return (
     <div style={{ paddingTop: 110, paddingBottom: 80 }}>
@@ -497,7 +265,7 @@ export default function Admin() {
             {liveMode ? "Live mode — changes go to everyone" : "Local mode — changes stay in your browser"}
             {" · "}{games.length} games · {cats.length} categories{syncing ? " · syncing…" : ""}
           </span>
-          <div style={{ marginLeft: "auto", ...btnRow }}>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-sm btn-gold" onClick={importDefaults} disabled={busy}>Import default library</button>
             <button className="btn btn-sm btn-purple" onClick={exportGames}>Export games.js</button>
             <button className="btn btn-sm btn-purple" onClick={exportCats}>Export categories.js</button>
@@ -513,60 +281,55 @@ export default function Admin() {
           ))}
         </div>
 
-        {tab === "games" && (
-          <>
-            <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
-              <input placeholder="Search games…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: "1 1 240px", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,.12)", background: "rgba(0,0,0,.3)", color: "#fff" }} />
-              <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)} style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,.12)", background: "rgba(0,0,0,.3)", color: "#fff" }}>
-                <option value="">All categories</option>
-                {cats.map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}
-              </select>
-              <button className="btn btn-gold" onClick={() => setEditing(emptyGame())}>+ Add game</button>
-            </div>
+        {tab === "games" && (<>
+          <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+            <input placeholder="Search games…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: "1 1 240px", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,.12)", background: "rgba(0,0,0,.3)", color: "#fff" }} />
+            <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)} style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,.12)", background: "rgba(0,0,0,.3)", color: "#fff" }}>
+              <option value="">All categories</option>
+              {cats.map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}
+            </select>
+            <button className="btn btn-gold" onClick={() => navigate("/admin/new")}>+ Add game</button>
+          </div>
 
-            <div style={{ background: "rgba(20,15,30,.6)", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,.06)" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 110px 130px 90px 200px", padding: "10px 14px", background: "rgba(0,0,0,.3)", fontSize: 12, color: "#cbb8e4", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                <div>Title</div><div>Category</div><div>Platforms</div><div>Rating</div><div style={{ textAlign: "right" }}>Actions</div>
-              </div>
-              {filtered.length === 0 && <div style={{ padding: 20, textAlign: "center" }} className="muted">No games match.</div>}
-              {filtered.map((g) => {
-                const cat = cats.find((c) => c.key === g.cat);
-                return (
-                  <div key={g.id} style={{ display: "grid", gridTemplateColumns: "1fr 110px 130px 90px 200px", padding: "12px 14px", borderTop: "1px solid rgba(255,255,255,.05)", alignItems: "center", fontSize: 14 }}>
-                    <div><b>{g.title}</b><div className="muted" style={{ fontSize: 12 }}>{g.slug} · {g.dev} · {g.year}</div></div>
-                    <div className="muted" style={{ fontSize: 13 }}>{cat ? cat.name : g.cat}</div>
-                    <div className="muted" style={{ fontSize: 12 }}>{(g.plat || []).join(", ")}</div>
-                    <div>★ {parseFloat(g.rating).toFixed(1)}</div>
-                    <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                      <button className="btn btn-sm" style={{ background: "rgba(255,255,255,.08)", color: "#fff", padding: "4px 8px" }} onClick={() => move(g.id, -1)}>↑</button>
-                      <button className="btn btn-sm" style={{ background: "rgba(255,255,255,.08)", color: "#fff", padding: "4px 8px" }} onClick={() => move(g.id, 1)}>↓</button>
-                      <button className="btn btn-sm btn-purple" onClick={() => setEditing(g)}>Edit</button>
-                    </div>
+          <div style={{ background: "rgba(20,15,30,.6)", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(255,255,255,.06)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "60px 1fr 110px 130px 90px 200px", padding: "10px 14px", background: "rgba(0,0,0,.3)", fontSize: 12, color: "#cbb8e4", textTransform: "uppercase", letterSpacing: 0.5 }}>
+              <div></div><div>Title</div><div>Category</div><div>Platforms</div><div>Rating</div><div style={{ textAlign: "right" }}>Actions</div>
+            </div>
+            {filtered.length === 0 && <div style={{ padding: 20, textAlign: "center" }} className="muted">No games match.</div>}
+            {filtered.map((g) => {
+              const cat = cats.find((c) => c.key === g.cat);
+              const poster = g.poster || g.image || (Array.isArray(g.images) && g.images[0]) || "";
+              return (
+                <div key={g.id} style={{ display: "grid", gridTemplateColumns: "60px 1fr 110px 130px 90px 200px", padding: "10px 14px", borderTop: "1px solid rgba(255,255,255,.05)", alignItems: "center", fontSize: 14, gap: 10 }}>
+                  <div style={{ width: 44, height: 60, borderRadius: 4, overflow: "hidden", background: "linear-gradient(135deg," + g.c[0] + "," + g.c[1] + ")", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "rgba(255,255,255,.5)" }}>
+                    {poster ? <img src={poster} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "—"}
                   </div>
-                );
-              })}
-            </div>
-
-            {editing && (
-              <div ref={editorRef}>
-                <GameEditor key={editing.id} game={editing} cats={cats} onSave={onSaveGame} onCancel={() => setEditing(null)} onDelete={onDeleteGame} canUpload={liveMode} />
-              </div>
-            )}
-          </>
-        )}
+                  <div><b>{g.title}</b><div className="muted" style={{ fontSize: 12 }}>{g.slug} · {g.dev} · {g.year}</div></div>
+                  <div className="muted" style={{ fontSize: 13 }}>{cat ? cat.name : g.cat}</div>
+                  <div className="muted" style={{ fontSize: 12 }}>{(g.plat || []).join(", ")}</div>
+                  <div>★ {parseFloat(g.rating).toFixed(1)}</div>
+                  <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                    <button className="btn btn-sm" style={{ background: "rgba(255,255,255,.08)", color: "#fff", padding: "4px 8px" }} onClick={() => move(g.id, -1)}>↑</button>
+                    <button className="btn btn-sm" style={{ background: "rgba(255,255,255,.08)", color: "#fff", padding: "4px 8px" }} onClick={() => move(g.id, 1)}>↓</button>
+                    <button className="btn btn-sm btn-purple" onClick={() => navigate("/admin/edit/" + g.slug)}>Edit</button>
+                    <button className="btn btn-sm" style={{ background: "#5a1a1a", color: "#fff", padding: "4px 8px" }} onClick={() => onDeleteGame(g.id)}>×</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>)}
 
         {tab === "categories" && <CategoryEditor cats={cats} onSet={pushCats} games={games} />}
 
         {tab === "help" && (
           <div style={{ background: "rgba(20,15,30,.7)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, padding: 22, lineHeight: 1.7 }}>
             <h3 className="gold-text" style={{ fontSize: 20, marginBottom: 10 }}>How edits go live</h3>
-            <p className="muted" style={{ fontSize: 14 }}>{liveMode ? <>You're signed in as an <b>admin</b>. Saves push to the database — visitors see them immediately.</> : <>You're in <b>local mode</b>. Edits affect your browser only. Sign in with an admin account or export &amp; <code>git push</code> to go live.</>}</p>
-            <h3 className="gold-text" style={{ fontSize: 20, marginTop: 22, marginBottom: 10 }}>Bringing existing games into the database</h3>
-            <p className="muted" style={{ fontSize: 14 }}>Click the gold <b>Import default library</b> button (top right) once. It uploads the 30 starter games + 6 categories to Supabase. From then on, all edits/adds/deletes save to the database.</p>
-            <h3 className="gold-text" style={{ fontSize: 20, marginTop: 22, marginBottom: 10 }}>Images &amp; videos</h3>
-            <p className="muted" style={{ fontSize: 14 }}>Open any game → scroll to <b>Images</b>. Drag-drop or click the dotted box to upload. The first image is the poster. For videos paste a YouTube URL, a Twitch VOD URL, or a Twitch channel URL (live streams). Multiple supported per game.</p>
-            <h3 className="gold-text" style={{ fontSize: 20, marginTop: 22, marginBottom: 10 }}>Local password</h3>
-            <p className="muted" style={{ fontSize: 14 }}>Edit <code>src/pages/Admin.jsx</code>, line <code>const ADMIN_PASSWORD</code>.</p>
+            <p className="muted" style={{ fontSize: 14 }}>{liveMode ? <>You're signed in as an <b>admin</b>. Saves push to the database — visitors see them immediately.</> : <>You're in <b>local mode</b>. Sign in with an admin GameZy account for live edits.</>}</p>
+            <h3 className="gold-text" style={{ fontSize: 20, marginTop: 22, marginBottom: 10 }}>Editing a game</h3>
+            <p className="muted" style={{ fontSize: 14 }}>Click <b>Edit</b> on any game (or <b>+ Add game</b>) to open the editor on a separate page with sections for <b>Poster</b>, <b>Media gallery</b>, <b>Official trailer</b>, and <b>Other videos</b>.</p>
+            <h3 className="gold-text" style={{ fontSize: 20, marginTop: 22, marginBottom: 10 }}>Video URLs supported</h3>
+            <p className="muted" style={{ fontSize: 14 }}>YouTube, Twitch VODs (twitch.tv/videos/123), and Twitch channels (twitch.tv/yourchannel — embeds the live stream when they're broadcasting).</p>
           </div>
         )}
 
