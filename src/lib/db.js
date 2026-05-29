@@ -136,3 +136,43 @@ export async function deleteGameImage(publicUrl) {
   const path = publicUrl.substring(i + marker.length);
   await supabase.storage.from(BUCKET).remove([path]);
 }
+
+/* ---------- Companies ---------- */
+export async function fetchLiveCompanies() {
+  if (!supabaseEnabled) return null;
+  const { data, error } = await supabase.from("companies").select("data, position").order("position", { ascending: true });
+  if (error) { console.warn("fetchLiveCompanies", error.message); return null; }
+  if (!data || !data.length) return null;
+  return data.map((r) => r.data);
+}
+export async function upsertCompanies(items) {
+  if (!supabaseEnabled) throw new Error("Supabase not configured.");
+  const rows = items.map((c, i) => ({ key: c.key, data: c, position: i, updated_at: new Date().toISOString() }));
+  const { error } = await supabase.from("companies").upsert(rows, { onConflict: "key" });
+  if (error) throw error;
+}
+export async function deleteCompanyByKey(key) {
+  if (!supabaseEnabled) throw new Error("Supabase not configured.");
+  const { error } = await supabase.from("companies").delete().eq("key", key);
+  if (error) throw error;
+}
+
+/* ---------- Teams ---------- */
+export async function fetchLiveTeams() {
+  if (!supabaseEnabled) return null;
+  const { data, error } = await supabase.from("teams").select("data, position").order("position", { ascending: true });
+  if (error) { console.warn("fetchLiveTeams", error.message); return null; }
+  if (!data || !data.length) return null;
+  return data.map((r) => r.data);
+}
+export async function upsertTeams(items) {
+  if (!supabaseEnabled) throw new Error("Supabase not configured.");
+  const rows = items.map((t, i) => ({ key: t.key, data: t, position: i, updated_at: new Date().toISOString() }));
+  const { error } = await supabase.from("teams").upsert(rows, { onConflict: "key" });
+  if (error) throw error;
+}
+export async function deleteTeamByKey(key) {
+  if (!supabaseEnabled) throw new Error("Supabase not configured.");
+  const { error } = await supabase.from("teams").delete().eq("key", key);
+  if (error) throw error;
+}

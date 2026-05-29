@@ -264,3 +264,39 @@ create policy "Admins delete game media"
 ```
 
 Click Run. Now the admin can upload images.
+
+---
+
+## Step 9 — Add companies + teams tables (1 min)
+
+In Supabase **SQL Editor → New query**, paste and run:
+
+```sql
+create table companies (
+  key text primary key,
+  data jsonb not null,
+  position int default 0,
+  updated_at timestamptz default now()
+);
+create table teams (
+  key text primary key,
+  data jsonb not null,
+  position int default 0,
+  updated_at timestamptz default now()
+);
+
+alter table companies enable row level security;
+alter table teams     enable row level security;
+
+create policy "Public read companies" on companies for select using (true);
+create policy "Public read teams"     on teams     for select using (true);
+
+create policy "Admin write companies" on companies for all
+  using (exists (select 1 from admins where user_id = auth.uid()))
+  with check (exists (select 1 from admins where user_id = auth.uid()));
+create policy "Admin write teams" on teams for all
+  using (exists (select 1 from admins where user_id = auth.uid()))
+  with check (exists (select 1 from admins where user_id = auth.uid()));
+```
+
+Run. You're done with the database setup.

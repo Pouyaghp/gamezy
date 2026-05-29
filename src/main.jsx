@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { AuthProvider } from "./lib/auth.jsx";
 import { supabaseEnabled } from "./lib/supabase.js";
-import { fetchLiveGames, fetchLiveCategories } from "./lib/db.js";
+import { fetchLiveGames, fetchLiveCategories, fetchLiveCompanies, fetchLiveTeams } from "./lib/db.js";
 import "./index.css";
 
 /* On every page load, pull the latest games & categories from Supabase
@@ -19,17 +19,20 @@ function LiveSync() {
       try {
         const games = await fetchLiveGames();
         const cats  = await fetchLiveCategories();
+        const comps = await fetchLiveCompanies();
+        const teams = await fetchLiveTeams();
         let changed = false;
-        if (games && games.length) {
-          const cur = localStorage.getItem("gamezy_games_v1");
-          const next = JSON.stringify(games);
-          if (cur !== next) { localStorage.setItem("gamezy_games_v1", next); changed = true; }
-        }
-        if (cats && cats.length) {
-          const cur = localStorage.getItem("gamezy_categories_v1");
-          const next = JSON.stringify(cats);
-          if (cur !== next) { localStorage.setItem("gamezy_categories_v1", next); changed = true; }
-        }
+        const sync = (key, arr) => {
+          if (arr && arr.length) {
+            const cur = localStorage.getItem(key);
+            const next = JSON.stringify(arr);
+            if (cur !== next) { localStorage.setItem(key, next); changed = true; }
+          }
+        };
+        sync("gamezy_games_v1", games);
+        sync("gamezy_categories_v1", cats);
+        sync("gamezy_companies_v1", comps);
+        sync("gamezy_teams_v1", teams);
         sessionStorage.setItem("gamezy_live_synced", "1");
         if (changed && !cancelled) window.location.reload();
       } catch (e) { /* silent */ }

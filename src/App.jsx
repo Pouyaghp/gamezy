@@ -12,6 +12,12 @@ import About from "./pages/About.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Admin from "./pages/Admin.jsx";
 import AdminEdit from "./pages/AdminEdit.jsx";
+import AdminCompanyEdit from "./pages/AdminCompanyEdit.jsx";
+import AdminTeamEdit from "./pages/AdminTeamEdit.jsx";
+import Companies from "./pages/Companies.jsx";
+import CompanyDetail from "./pages/CompanyDetail.jsx";
+import Teams from "./pages/Teams.jsx";
+import TeamDetail from "./pages/TeamDetail.jsx";
 import Profile from "./pages/Profile.jsx";
 
 function ScrollToTop() {
@@ -37,6 +43,14 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/new" element={<AdminEdit />} />
           <Route path="/admin/edit/:slug" element={<AdminEdit />} />
+          <Route path="/admin/companies/new" element={<AdminCompanyEdit />} />
+          <Route path="/admin/companies/edit/:slug" element={<AdminCompanyEdit />} />
+          <Route path="/admin/teams/new" element={<AdminTeamEdit />} />
+          <Route path="/admin/teams/edit/:slug" element={<AdminTeamEdit />} />
+          <Route path="/companies" element={<Companies />} />
+          <Route path="/company/:slug" element={<CompanyDetail />} />
+          <Route path="/teams" element={<Teams />} />
+          <Route path="/team/:slug" element={<TeamDetail />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

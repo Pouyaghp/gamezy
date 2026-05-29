@@ -9,6 +9,8 @@ import AuthModal from "./AuthModal.jsx";
 const LINKS = [
   ["/", "Home", true],
   ["/games", "Games", false],
+  ["/companies", "Studios", false],
+  ["/teams", "Teams", false],
   ["/platforms", "Platforms", false],
   ["/about", "About", false],
 ];
